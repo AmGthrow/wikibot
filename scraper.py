@@ -27,7 +27,8 @@ def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
             Defaults to 'https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'.
 
     Returns:
-        str: a URL to a randomly chosen wikipedia page
+        new_page: a URL to a randomly chosen wikipedia page
+        prev_page: a URL to the page where new_page came from or None
     """
 
     # soup-ify the wikipage URL
@@ -56,6 +57,7 @@ def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
 
     # Concatenate the wikipedia domain with a random href
     new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
-    return new_page
+    return new_page, prev_page
+
 
 print(get_page())

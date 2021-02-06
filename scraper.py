@@ -10,14 +10,14 @@ def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
     page.raise_for_status()
     soup = BeautifulSoup(page.text, 'lxml')
 
-    # get all 'a' tags that appear inside a 'p' tag (there are lots of 'a' tags like navbars that I don't care about,
-    # but the ones that are actually part of the page's "content" usually apear inside 'p' tags)
-    # BUG: throws KeyError if there are no 'p a' tags in the soup
-    new_pages = [page['href'] for page in soup.select('a[href]')]
+    # get all 'a' tags on the page
+
+    # BUG: throws KeyError if there are no 'a' tags in the soup
+    # This shouldn't be a problem though, since Wikipedia avoids dead pages like this? See: https://en.wikipedia.org/wiki/Category:Dead-end_pages
     new_pages = set(wiki_page for wiki_page in new_pages if re.search(
         '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
     # for page in new_pages:
     #     print(page)
-    return random.choice(tuple(new_pages))
+    return  'https://en.wikipedia.org' + random.choice(tuple(new_pages))
 
 print(get_page())

@@ -62,4 +62,6 @@ def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
     return new_page, prev_page
 
 
-print(get_page())
+if __name__ == "__main__":
+    new_page, prev_page = get_page()
+    print(f"I got to {new_page} from {prev_page}")

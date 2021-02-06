@@ -11,5 +11,6 @@ soup = BeautifulSoup(page.text, 'lxml')
 # but the ones that are actually part of the page's "content" usually apear inside 'p' tags)
 new_pages = [page['href'] for page in soup.select('a[href]')]   #BUG: throws KeyError if there are no 'p a' tags in the soup
 new_pages = [wiki_page for wiki_page in new_pages if re.search(
+    '^\/wiki\/(?!\w*:\w*).+$', wiki_page)]    # only keep wiki_pages that look like '\wiki\<something>' TODO: Make the regex ignore '/wiki/Wikipedia:about' and similar
 for page in new_pages:
     print(page)

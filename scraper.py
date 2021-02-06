@@ -49,6 +49,8 @@ def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
         # Try finding the new_pages from the new wikipage
         new_pages = soup.select('a[href]')
 
+    # extract only the 'href' attribute in all the tags
+    new_pages = [page['href'] for page in new_pages]
     # Turn new_pages into a set to remove dupliactes
     new_pages = set(wiki_page for wiki_page in new_pages if re.search(
         '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'

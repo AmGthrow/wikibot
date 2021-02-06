@@ -4,11 +4,18 @@ import re
 import random
 from bs4 import BeautifulSoup
 
+def get_soup(wikipage):
+    """makes a BeautifulSoup object from a generic URL
 
-def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'):
+    Args:
+        wikipage (str): a URL for the webpage you want to soup-ify
+
+    Returns:
+        bs4.BeautifulSoup: A BeautifulSoup object which soup-ifies the given URL
+    """
     page = requests.get(wikipage)
     page.raise_for_status()
-    soup = BeautifulSoup(page.text, 'lxml')
+    return BeautifulSoup(page.text, 'lxml')
 
     # get all 'a' tags on the page
 

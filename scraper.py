@@ -14,6 +14,11 @@ def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
 
     # BUG: throws KeyError if there are no 'a' tags in the soup
     # This shouldn't be a problem though, since Wikipedia avoids dead pages like this? See: https://en.wikipedia.org/wiki/Category:Dead-end_pages
+    # Just in case I'll just throw None if it happens
+    try:
+        new_pages = [page['href'] for page in soup.select('a[href]')]
+    except:
+        return None
     new_pages = set(wiki_page for wiki_page in new_pages if re.search(
         '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
     # for page in new_pages:

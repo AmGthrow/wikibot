@@ -4,6 +4,7 @@ import re
 import random
 from bs4 import BeautifulSoup
 
+
 def get_soup(wikipage):
     """makes a BeautifulSoup object from a generic URL
 
@@ -16,6 +17,23 @@ def get_soup(wikipage):
     page = requests.get(wikipage)
     page.raise_for_status()
     return BeautifulSoup(page.text, 'lxml')
+
+
+def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'):
+    """Returns a URL to another wikipage using a link that exists in a given wikipage
+
+    Args:
+        wikipage (str, optional): wikipedia page that potentially contains links to more wikipedia pages. 
+            Defaults to 'https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'.
+
+    Returns:
+        str: a URL to a randomly chosen wikipedia page
+    """
+
+    # soup-ify the wikipage URL
+    soup = get_soup(wikipage)
+    # Records the page that new_page came from
+    prev_page = wikipage
 
     # get all 'a' tags on the page that have an 'href' atrribute
     new_pages = soup.select('a[href]')
@@ -30,17 +48,14 @@ def get_soup(wikipage):
         # Try finding the new_pages from the new wikipage
         new_pages = soup.select('a[href]')
 
-    # BUG: throws KeyError if there are no 'a' tags in the soup
-    # This shouldn't be a problem though, since Wikipedia avoids dead pages like this? See: https://en.wikipedia.org/wiki/Category:Dead-end_pages
-    # Just in case I'll just throw None if it happens
-    try:
-        new_pages = [page['href'] for page in soup.select('a[href]')]
-    except:
-        return None
+    # Turn new_pages into a set to remove dupliactes
     new_pages = set(wiki_page for wiki_page in new_pages if re.search(
         '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
     # for page in new_pages:
     #     print(page)
-    return  'https://en.wikipedia.org' + random.choice(tuple(new_pages))
+
+    # Concatenate the wikipedia domain with a random href
+    new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
+    return new_page
 
 print(get_page())

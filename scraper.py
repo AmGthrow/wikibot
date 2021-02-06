@@ -1,7 +1,7 @@
-from bs4 import BeautifulSoup
 import requests
 import lxml
-import re
+from bs4 import BeautifulSoup
+from re import search
 
 page = requests.get('https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon')
 page.raise_for_status()

@@ -9,6 +9,7 @@ class Wikipage:
     def __init__(self, url):
         self.url = url
         self.soup = self.get_soup(self.url)
+        self.title = self.get_title()
 
     def get_soup(self, wikipage):
         """makes a BeautifulSoup object from a generic URL
@@ -49,15 +50,23 @@ class Wikipage:
         # Turn new_pages into a set to remove dupliactes
         new_pages = set(wiki_page for wiki_page in new_pages if re.search(
             '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
-        # for page in new_pages:
+        # for page in new_pages:    # TODO: Use a logger instead of a print
         #     print(page)
 
         # Concatenate the wikipedia domain with a random href
         new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
+        # Make sure we don't just link to the current page
+        while new_page == self.url:
+            new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
+
         return new_page
+
+    def get_title(self):
+        return self.soup.select_one('#firstHeading').text
 
 
 if __name__ == "__main__":
     page = Wikipage('https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon')
     print(page.url)
     print(page.get_page())
+    print(page.get_title())

@@ -35,7 +35,7 @@ class Wikipage:
         soup = self.soup
 
         # get all 'a' tags on the page that have an 'href' atrribute
-        new_pages = soup.select('a[href]')
+        new_pages = soup.select('p > a[href]')
 
         # Just in case there are no href's, search a random article instead
         while new_pages == []:
@@ -43,22 +43,24 @@ class Wikipage:
             soup = self.get_soup(
                 'https://en.wikipedia.org/wiki/Special:Random')
             # Try finding the new_pages from the new wikipage instead
-            new_pages = soup.select('a[href]')
+            new_pages = soup.select('p > a[href]')
 
         # extract only the 'href' attribute in all the tags
         new_pages = [page['href'] for page in new_pages]
         # Turn new_pages into a set to remove dupliactes
         new_pages = set(wiki_page for wiki_page in new_pages if re.search(
             '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
-        # for page in new_pages:    # TODO: Use a logger instead of a print
-        #     print(page)
+
+        #  manually remove '/wiki/Main_Page'. It looks remarkably like a regular wikipage but it's the only one that's this similar
+        new_pages.remove('/wiki/Main_Page')
+
 
         # Concatenate the wikipedia domain with a random href
         new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
         # Make sure we don't just link to the current page
         while new_page == self.url:
-            new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
-
+            new_page = 'https://en.wikipedia.org' + \
+                random.choice(tuple(new_pages))
         return new_page
 
     def get_title(self):
@@ -70,8 +72,10 @@ class Wikipage:
         # 2) I never actually call select_one() unless I have to (i.e. self.summary doesn't exist until I call summarize())
         # This means I don't waste resources trying to summarize webpages that I don't even need the summary for
         if not hasattr(self, 'summary'):
-            self.summary = self.soup.select_one('p:not([class])').text
+            self.summary = self.soup.select_one(
+                '.mw-parser-output p:not([class])').text
         return self.summary
+
 
 if __name__ == "__main__":
     page = Wikipage('https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon')

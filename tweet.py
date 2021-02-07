@@ -51,4 +51,9 @@ def tweet(URL):
     Args:
         URL (string): A URL containing a wikipage whose links we need to search
     """
-    pass
+
+
+for _ in range(5):
+    with open('prev_page.txt', 'r') as prevf:
+        prev_page = prevf.read()
+    print(compose_tweet(prev_page))

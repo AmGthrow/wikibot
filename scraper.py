@@ -5,63 +5,82 @@ import random
 from bs4 import BeautifulSoup
 
 
-def get_soup(wikipage):
-    """makes a BeautifulSoup object from a generic URL
+class Wikipage:
+    def __init__(self, url):
+        self.url = url
+        self.soup = self.get_soup(self.url)
+        self.title = self.get_title()
 
-    Args:
-        wikipage (str): a URL for the webpage you want to soup-ify
+    def get_soup(self, wikipage):
+        """makes a BeautifulSoup object from a generic URL
 
-    Returns:
-        bs4.BeautifulSoup: A BeautifulSoup object which soup-ifies the given URL
-    """
-    page = requests.get(wikipage)
-    page.raise_for_status()
-    return BeautifulSoup(page.text, 'lxml')
+        Args:
+            wikipage (str): a URL for the webpage you want to soup-ify
+
+        Returns:
+            bs4.BeautifulSoup: A BeautifulSoup object which soup-ifies the given URL
+        """
+        page = requests.get(wikipage)
+        page.raise_for_status()
+        return BeautifulSoup(page.text, 'lxml')
+
+    def get_page(self):
+        """Returns a URL to another wikipage using a link that exists in a given wikipage
+
+        Returns:
+            prev_page: a URL to a Wikipedia page with a backlink to self.url
+        """
+
+        # soup-ify the wikipage URL
+        soup = self.soup
+
+        # get all 'a' tags on the page that have an 'href' atrribute
+        new_pages = soup.select('p > a[href]')
+
+        # Just in case there are no href's, search a random article instead
+        while new_pages == []:
+            # Travel to a random wikipage
+            soup = self.get_soup(
+                'https://en.wikipedia.org/wiki/Special:Random')
+            # Try finding the new_pages from the new wikipage instead
+            new_pages = soup.select('p > a[href]')
+
+        # extract only the 'href' attribute in all the tags
+        new_pages = [page['href'] for page in new_pages]
+        # Turn new_pages into a set to remove dupliactes
+        new_pages = set(wiki_page for wiki_page in new_pages if re.search(
+            '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
+
+        #  manually remove '/wiki/Main_Page'. It looks remarkably like a regular wikipage but it's the only one that's this similar
+        new_pages.remove('/wiki/Main_Page')
 
 
-def get_page(wikipage='https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'):
-    """Returns a URL to another wikipage using a link that exists in a given wikipage
+        # Concatenate the wikipedia domain with a random href
+        new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
+        # Make sure we don't just link to the current page
+        while new_page == self.url:
+            new_page = 'https://en.wikipedia.org' + \
+                random.choice(tuple(new_pages))
+        return new_page
 
-    Args:
-        wikipage (str, optional): wikipedia page that potentially contains links to more wikipedia pages. 
-            Defaults to 'https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'.
+    def get_title(self):
+        return self.soup.select_one('#firstHeading').text
 
-    Returns:
-        new_page: a URL to a randomly chosen wikipedia page
-        prev_page: a URL to the page where new_page came from or None
-    """
-
-    # soup-ify the wikipage URL
-    soup = get_soup(wikipage)
-    # Records the page that new_page came from
-    prev_page = wikipage
-
-    # get all 'a' tags on the page that have an 'href' atrribute
-    new_pages = soup.select('a[href]')
-
-    # Just in case there are no href's, search a random article instead
-    while new_pages == []:
-        # Erases the "page we came from" since we couldn't find any new wikipages there
-        prev_page = None
-
-        # Travel to a random wikipage
-        soup = get_soup('https://en.wikipedia.org/wiki/Special:Random')
-        # Try finding the new_pages from the new wikipage
-        new_pages = soup.select('a[href]')
-
-    # extract only the 'href' attribute in all the tags
-    new_pages = [page['href'] for page in new_pages]
-    # Turn new_pages into a set to remove dupliactes
-    new_pages = set(wiki_page for wiki_page in new_pages if re.search(
-        '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
-    # for page in new_pages:
-    #     print(page)
-
-    # Concatenate the wikipedia domain with a random href
-    new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
-    return new_page, prev_page
+    def summarize(self):
+        # I don't always need to summarize, so writing it this way ensures that
+        # 1) I only call select_one() once
+        # 2) I never actually call select_one() unless I have to (i.e. self.summary doesn't exist until I call summarize())
+        # This means I don't waste resources trying to summarize webpages that I don't even need the summary for
+        if not hasattr(self, 'summary'):
+            self.summary = self.soup.select_one(
+                '.mw-parser-output p:not([class])').text
+        return self.summary
 
 
 if __name__ == "__main__":
-    new_page, prev_page = get_page()
-    print(f"I got to {new_page} from {prev_page}")
+    page = Wikipage('https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon')
+    print(page.url)
+    print(page.get_page())
+    print(page.get_title())
+    print(page.summarize())
+    print(page.summary)

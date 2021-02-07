@@ -69,8 +69,12 @@ def tweet(URL):
         URL (string): A URL containing a wikipage whose links we need to search
     """
     # make the actual message to tweet out
+    with open('prev_page.txt', 'r') as prevf:
+        prev_page = prevf.read()
+    message = compose_tweet(prev_page)
 
-    # update prev_page.txt
+    # Make sure message fits the 280 character limit (with room for an ellipsis)
+    message = message[:277] + '...'
 
     # tweet it out
 

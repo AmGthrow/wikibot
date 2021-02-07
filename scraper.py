@@ -2,7 +2,23 @@ import requests
 import lxml
 import re
 import random
+import logging
+import logging.handlers
 from bs4 import BeautifulSoup
+
+
+logger = logging.getLogger(__name__)
+# set log level
+logger.setLevel(logging.INFO)
+
+# define file handler and set formatter
+file_handler = logging.handlers.RotatingFileHandler('wikibot.log', maxBytes = 50000)
+formatter = logging.Formatter(
+    '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+file_handler.setFormatter(formatter)
+
+# add file handler to logger
+logger.addHandler(file_handler)
 
 
 class Wikipage:
@@ -54,6 +70,8 @@ class Wikipage:
         #  manually remove '/wiki/Main_Page'. It looks remarkably like a regular wikipage but it's the only one that's this similar
         new_pages.remove('/wiki/Main_Page')
 
+        for page in new_pages:    # TODO: Use a logger instead of a print
+            logger.info(f"Found page: {page}")
 
         # Concatenate the wikipedia domain with a random href
         new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
@@ -61,6 +79,7 @@ class Wikipage:
         while new_page == self.url:
             new_page = 'https://en.wikipedia.org' + \
                 random.choice(tuple(new_pages))
+        logger.info(f'selected {new_page}')
         return new_page
 
     def get_title(self):

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # define file handler and set formatter
-file_handler = logging.handlers.RotatingFileHandler('wikibot.log', maxBytes = 50000)
+file_handler = logging.handlers.RotatingFileHandler('log/scraper.log', maxBytes = 50000, backupCount=1)
 formatter = logging.Formatter(
     '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
 file_handler.setFormatter(formatter)
@@ -46,7 +46,7 @@ class Wikipage:
         Returns:
             prev_page: a URL to a Wikipedia page with a backlink to self.url
         """
-
+        logger.info(f'scraping for links in {self.url}')
         # soup-ify the wikipage URL
         soup = self.soup
 

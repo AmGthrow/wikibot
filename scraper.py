@@ -64,9 +64,13 @@ class Wikipage:
     def get_title(self):
         return self.soup.select_one('#firstHeading').text
 
+    def summarize(self):
+        self.summary = self.soup.select_one('p:not([class])').text
+        return self.summary
 
 if __name__ == "__main__":
     page = Wikipage('https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon')
     print(page.url)
     print(page.get_page())
     print(page.get_title())
+    print(page.summarize())

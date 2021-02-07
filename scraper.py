@@ -65,7 +65,12 @@ class Wikipage:
         return self.soup.select_one('#firstHeading').text
 
     def summarize(self):
-        self.summary = self.soup.select_one('p:not([class])').text
+        # I don't always need to summarize, so writing it this way ensures that
+        # 1) I only call select_one() once
+        # 2) I never actually call select_one() unless I have to (i.e. self.summary doesn't exist until I call summarize())
+        # This means I don't waste resources trying to summarize webpages that I don't even need the summary for
+        if not hasattr(self, 'summary'):
+            self.summary = self.soup.select_one('p:not([class])').text
         return self.summary
 
 if __name__ == "__main__":
@@ -74,3 +79,4 @@ if __name__ == "__main__":
     print(page.get_page())
     print(page.get_title())
     print(page.summarize())
+    print(page.summary)

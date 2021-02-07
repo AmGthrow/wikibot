@@ -2,6 +2,21 @@
 import scraper
 import textwrap
 import re
+import logging
+import logging.handlers
+
+logger = logging.getLogger(__name__)
+# set log level
+logger.setLevel(logging.INFO)
+
+# define file handler and set formatter
+file_handler = logging.handlers.RotatingFileHandler('wikibot.log', maxBytes = 50000)
+formatter = logging.Formatter(
+    '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+file_handler.setFormatter(formatter)
+
+# add file handler to logger
+logger.addHandler(file_handler)
 
 
 def compose_tweet(page):
@@ -15,6 +30,7 @@ def compose_tweet(page):
     Args:
         URL (string): A URL containing a wikipage whose links we need to search
     """
+    logger.info(f"Composing tweet for {page}")
     # Make Wikipage objects representing the current page
     prev_page = scraper.Wikipage(page)
 
@@ -45,15 +61,26 @@ def compose_tweet(page):
 
     return textwrap.dedent(message)
 
+
 def tweet(URL):
     """does the actual tweeting
 
     Args:
         URL (string): A URL containing a wikipage whose links we need to search
     """
+    # make the actual message to tweet out
+
+    # update prev_page.txt
+
+    # tweet it out
 
 
+logger.info("Started tweet.py driver code")
 for _ in range(5):
     with open('prev_page.txt', 'r') as prevf:
         prev_page = prevf.read()
     print(compose_tweet(prev_page))
+# with open('prev_page.txt', 'r') as prevf:
+#     prev_page = prevf.read()
+# print(compose_tweet(prev_page))
+logger.info("Finished tweet.py driver code")

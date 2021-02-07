@@ -52,7 +52,8 @@ class Wikipage:
             '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
 
         #  manually remove '/wiki/Main_Page'. It looks remarkably like a regular wikipage but it's the only one that's this similar
-        new_pages.remove('/wiki/Main_Page')
+        if '/wiki/Main_Page' in new_pages:
+            new_pages.remove('/wiki/Main_Page')
 
 
         # Concatenate the wikipedia domain with a random href

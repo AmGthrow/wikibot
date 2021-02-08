@@ -99,17 +99,16 @@ def shorten_summary(title, summary):
     # BUG: I have NO idea why but this function just CONSISTENTLY has 2 excess characters so I guess I have to shave those off
     chars_remaining -= 2 
 
+    # Trim off whatever excess remains since at this point, they have no chance of being included anyway
+    summary = summary[:chars_remaining - 3] # -3 to make room for ellipsis
+    summary += '...'
+
     # There are some Unicode characters that Twitter gives a weight of 2, not just 1. e.g. Emojis should reduce chars_remaining by 2, not just 1
     # See this: https://developer.twitter.com/en/docs/counting-characters
     # So I need to keep track of those letters and subtract the 'extra weight' from chars_remaining. This for loop does exactly that
 
-    # Assuming the summary has no "2-weight characters", the summary can only be as long as this value
-    # I don't bother checking anything past this since those characters have no hope of being included in the tweet anyway, they're 
-    # already outside the range of chars_remaining
-    potential_longest_index = chars_remaining   
-    
-    # The summary right now might be incredibly long, but I only need to check for 2-weight characters within potential_longest_index
-    for s in summary[:potential_longest_index]:
+    # If I find any 2-weight characters in summary, deduct chars_remaining accordingly
+    for s in summary:
         code_point = ord(s)
         if not (0 <= code_point <= 4351 or \
         8192 <= code_point <= 8205 or \

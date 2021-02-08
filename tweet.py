@@ -71,7 +71,7 @@ def compose_tweet(page, fit_tweet_limit=False, erase_prev=True):
     {new_summary}"""
 
     # log the composed message
-    logger.info(f"composed message:\n\n{message}")
+    logger.info(f"composed message:\n\n{message.encode('utf-8')}")
 
     if erase_prev:
         # Overwrite whatever was in prev_page.txt

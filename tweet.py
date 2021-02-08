@@ -41,7 +41,15 @@ def compose_tweet(page, fit_tweet_limit=False):
     I got to here: <NEW URL>
 
     <SUMMARY OF NEW PAGE>
+
+    Args:
+        page (str): A URL to the "From here" Wikipage
+        fit_tweet_limit (bool): Whether or not compose_tweet() should shorten the summary to fit Twitter's character limit
+
+    Returns:
+        str: The composed message ready for tweeting
     """
+
     logger.info(f"Composing tweet for {page}")
     # Make Wikipage objects representing the current page
     prev_page = scraper.Wikipage(page)
@@ -135,9 +143,11 @@ def tweet():
     api = tweepy.API(auth)
 
     # Retrieve the last few tweets the bot has sent
-    last_statuses = api.user_timeline(count = 10)
+    last_statuses = api.user_timeline(count=10)
+
     # Assume that a previous page hasn't been explored yet
     url = None
+    
     # Check the tweets we retrieved
     for last_status in last_statuses:
         try:
@@ -159,7 +169,7 @@ def tweet():
     if url is None:
         url = 'https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
         logger.info(f"Failed to retrieve latest link, using default: {url}")
-    
+
     # compose the actual message to tweet out
     message = compose_tweet(url, fit_tweet_limit=True)
 

@@ -62,7 +62,8 @@ def compose_tweet(page, fit_tweet_limit=False, erase_prev=True):
     if fit_tweet_limit:
         new_summary = shorten_summary(new_title, new_summary)
 
-    message = f"""{new_title}
+    message = f"""\
+    {new_title}
 
     From here: {prev_url}
     I got to here: {new_url}

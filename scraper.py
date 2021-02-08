@@ -67,19 +67,18 @@ class Wikipage:
         new_pages = set(wiki_page for wiki_page in new_pages if re.search(
             '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
 
-        #  manually remove '/wiki/Main_Page'. It looks remarkably like a regular wikipage but it's the only one that's this similar
+        # new_pages probably has '/wiki/Main_Page', so I have to manually remove it since it doesn't count as an "article"
+        # every other technical, "non-article" webpage is covered by the negative lookahead in the regex above
         if '/wiki/Main_Page' in new_pages:
             new_pages.remove('/wiki/Main_Page')
 
-        for page in new_pages:    # TODO: Use a logger instead of a print
-            logger.info(f"Found page: {page}")
+        # I also manually remove the current page if new_pages has it, I don't want to "come back" so soon
+        if f"/wiki/{self.url}" in new_pages:
+            nwe_pages.remove(f"/wiki/{self.url}")
 
         # Concatenate the wikipedia domain with a random href
         new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
-        # Make sure we don't just link to the current page
-        while new_page == self.url:
-            new_page = 'https://en.wikipedia.org' + \
-                random.choice(tuple(new_pages))
+
         logger.info(f'selected {new_page}')
         return new_page
 

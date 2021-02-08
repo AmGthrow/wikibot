@@ -68,9 +68,10 @@ def compose_tweet(page, fit_tweet_limit=False, erase_prev=True):
     From here: {prev_url}
     I got to here: {new_url}
 
-    {new_summary}
-    """
-    logging.info(f"composed message:\n\n{message}")
+    {new_summary}"""
+
+    # log the composed message
+    logger.info(f"composed message:\n\n{message}")
 
     if erase_prev:
         # Overwrite whatever was in prev_page.txt

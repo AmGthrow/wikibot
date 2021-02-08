@@ -32,7 +32,7 @@ access_token = getenv("ACCESS_TOKEN")
 access_token_secret = getenv("ACCESS_TOKEN_SECRET")
 
 
-def compose_tweet(page, fit_tweet_limit=False, erase_prev=True):
+def compose_tweet(page, fit_tweet_limit=False):
     """Composes a tweet that's ready to be posted in this format
 
     <NEW TITLE>
@@ -72,11 +72,6 @@ def compose_tweet(page, fit_tweet_limit=False, erase_prev=True):
 
     # log the composed message
     logger.info(f"composed message:\n\n{message.encode('utf-8')}")
-
-    if erase_prev:
-        # Overwrite whatever was in prev_page.txt
-        with open('prev_page.txt', 'w') as prevf:
-            prevf.write(new_url)
 
     return textwrap.dedent(message)
 

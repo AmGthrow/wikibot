@@ -93,7 +93,7 @@ class Wikipage:
         # This means I don't waste resources trying to summarize webpages that I don't even need the summary for
         if not hasattr(self, 'summary'):
             self.summary = self.soup.select_one(
-                '.mw-parser-output p:not([class])').text
+                '.mw-parser-output > p:not([class])').text
         return self.summary
 
 

@@ -128,27 +128,51 @@ def shorten_summary(title, summary):
     return summary
 
 
-def tweet(url):
-    """Connects to the Twitter API and sends out a tweet using compose_tweet(url)
-
-    Args:
-        url (str): The Wikipedia page whose links need to be searched
+def tweet():
+    """Connects to the Twitter API and sends out a tweet using compose_tweet(url),
+    where url is either the last scraped webpage or Six Degrees of Kevin Bacon
     """
-    # make the actual message to tweet out
-    message = compose_tweet(url, fit_tweet_limit=True)
 
-    # tweet it out
+    # Do Tweepy authentication stuff
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
 
     api = tweepy.API(auth)
 
+    # Retrieve the last few tweets the bot has sent
+    last_statuses = api.user_timeline(count = 10)
+    # Assume that a previous page hasn't been explored yet
+    url = None
+    # Check the tweets we retrieved
+    for last_status in last_statuses:
+        try:
+            # Checks if the tweet has 2 urls and if so, store the 2nd one
+            url = last_status.entities['urls'][1]['expanded_url']
+
+            # Make sure that the 2nd url is a wikipage
+            if not 'https://en.wikipedia.org/wiki/' in url:
+                # If it's not, disregard and continue looking
+                url = None
+                continue
+            else:
+                # Otherwise, we found a wikipage and we're ready to tweet it
+                logger.info(f"Retrieved latest link: {url}")
+                break
+        except Exception as e:
+            pass
+    # If we haven't found a URL in the last 10 tweets, just use default
+    if url is None:
+        url = 'https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon'
+        logger.info(f"Failed to retrieve latest link, using default: {url}")
+    
+    # compose the actual message to tweet out
+    message = compose_tweet(url, fit_tweet_limit=True)
+
+    # tweet it out
     api.update_status(message)
 
 
 if __name__ == "__main__":
     logger.info('Started tweet.py driver code')
-    with open('prev_page.txt', 'r') as prevf:
-        prev_page = prevf.read()
-    tweet(prev_page)
+    tweet()
     logger.info("Finished tweet.py driver code")

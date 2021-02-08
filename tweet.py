@@ -4,19 +4,28 @@ import textwrap
 import re
 import logging
 import logging.handlers
+import tweepy
+from os import getenv
 
 logger = logging.getLogger(__name__)
 # set log level
 logger.setLevel(logging.INFO)
 
 # define file handler and set formatter
-file_handler = logging.handlers.RotatingFileHandler('log/tweet.log', maxBytes = 50000, backupCount=1)
+file_handler = logging.handlers.RotatingFileHandler(
+    'log/tweet.log', maxBytes=50000, backupCount=1)
 formatter = logging.Formatter(
     '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
 file_handler.setFormatter(formatter)
 
 # add file handler to logger
 logger.addHandler(file_handler)
+
+# Get API keys and stuff
+consumer_key = getenv("CONSUMER_KEY")
+consumer_secret = getenv("CONSUMER_SECRET")
+access_token = getenv("ACCESS_TOKEN")
+access_token_secret = getenv("ACCESS_TOKEN_SECRET")
 
 
 def compose_tweet(page):
@@ -27,8 +36,7 @@ def compose_tweet(page):
     From here: <URL>
     I got to here: <NEW URL>
 
-    Args:
-        URL (string): A URL containing a wikipage whose links we need to search
+    <SUMMARY OF NEW PAGE>
     """
     logger.info(f"Composing tweet for {page}")
     # Make Wikipage objects representing the current page
@@ -62,7 +70,7 @@ def compose_tweet(page):
     return textwrap.dedent(message)
 
 
-def tweet(URL):
+def tweet():
     """does the actual tweeting
 
     Args:
@@ -77,14 +85,23 @@ def tweet(URL):
     message = message[:277] + '...'
 
     # tweet it out
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth)
+
+    api.update_status(message)
 
 
-logger.info("Started tweet.py driver code")
-for _ in range(5):
-    with open('prev_page.txt', 'r') as prevf:
-        prev_page = prevf.read()
-    print(compose_tweet(prev_page))
-# with open('prev_page.txt', 'r') as prevf:
-#     prev_page = prevf.read()
-# print(compose_tweet(prev_page))
-logger.info("Finished tweet.py driver code")
+# logger.info("Started tweet.py driver code")
+# for _ in range(5):
+#     with open('prev_page.txt', 'r') as prevf:
+#         prev_page = prevf.read()
+#     print(compose_tweet(prev_page))
+# # with open('prev_page.txt', 'r') as prevf:
+# #     prev_page = prevf.read()
+# # print(compose_tweet(prev_page))
+# logger.info("Finished tweet.py driver code")
+
+if __name__ == "__main__":
+    tweet()

@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # define file handler and set formatter
-file_handler = logging.handlers.RotatingFileHandler('log/scraper.log', maxBytes = 50000, backupCount=1)
+file_handler = logging.handlers.RotatingFileHandler(
+    'log/scraper.log', maxBytes=50000, backupCount=1)
 formatter = logging.Formatter(
     '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
 file_handler.setFormatter(formatter)
@@ -22,6 +23,8 @@ logger.addHandler(file_handler)
 
 
 class Wikipage:
+    """A Wikipage object that represents a single article on Wikipedia
+    """
     def __init__(self, url):
         self.url = url
         self.soup = self.get_soup(self.url)
@@ -53,7 +56,7 @@ class Wikipage:
         # get all 'a' tags on the page that have an 'href' atrribute
         new_pages = soup.select('p > a[href]')
 
-        # Just in case there are no href's, search a random article instead
+        # Just in case there are no viable links on this Wikipage, search a random article instead
         while new_pages == []:
             # Travel to a random wikipage
             soup = self.get_soup(
@@ -61,11 +64,15 @@ class Wikipage:
             # Try finding the new_pages from the new wikipage instead
             new_pages = soup.select('p > a[href]')
 
-        # extract only the 'href' attribute in all the tags
+        # new_pages is still a list of Tag objects, so I want to
+        # extract only the 'href' attribute in all the tags to get clean strings
         new_pages = [page['href'] for page in new_pages]
-        # Turn new_pages into a set to remove dupliactes
-        new_pages = set(wiki_page for wiki_page in new_pages if re.search(
-            '^\/wiki\/(?!\w*:\w*).+$', wiki_page))    # only keep wiki_pages that look like '\wiki\<something>'
+
+        # only keep new_pages that look like '\wiki\<something>'
+        # I'm avoiding <text>:<text> Because that's what technical Wikipedia pages look like
+        # e.g. https://en.wikipedia.org/wiki/Wikipedia:Contents
+        new_pages = set(wiki_page for wiki_page in new_pages if re.search(  # Use set() to remove duplicates
+            '^\/wiki\/(?!\w*:\w*).+$', wiki_page))
 
         # new_pages probably has '/wiki/Main_Page', so I have to manually remove it since it doesn't count as an "article"
         # every other technical, "non-article" webpage is covered by the negative lookahead in the regex above
@@ -76,13 +83,19 @@ class Wikipage:
         if f"/wiki/{self.url}" in new_pages:
             nwe_pages.remove(f"/wiki/{self.url}")
 
+        for page in new_pages:    
+            logger.info(f"Found page: {page}")  # log all the candidates the scraper has found
+
         # Concatenate the wikipedia domain with a random href
         new_page = 'https://en.wikipedia.org' + random.choice(tuple(new_pages))
 
+        # log which one I selected
         logger.info(f'selected {new_page}')
+
         return new_page
 
     def get_title(self):
+        # get_title() is pretty fast to execute, so I don't bother doing the "only call if needed" thing I do in summarize()
         return self.soup.select_one('#firstHeading').text
 
     def summarize(self):

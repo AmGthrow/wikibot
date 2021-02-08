@@ -97,10 +97,10 @@ def shorten_summary(title, summary):
     # This is just the length of the "from here I got to here" part, including newlines and spaces
     chars_remaining -= 29
     # BUG: I have NO idea why but this function just CONSISTENTLY has 2 excess characters so I guess I have to shave those off
-    chars_remaining -= 2 
+    chars_remaining -= 2
 
     # Trim off whatever excess remains since at this point, they have no chance of being included anyway
-    summary = summary[:chars_remaining - 3] # -3 to make room for ellipsis
+    summary = summary[:chars_remaining - 3]  # -3 to make room for ellipsis
     summary += '...'
 
     # There are some Unicode characters that Twitter gives a weight of 2, not just 1. e.g. Emojis should reduce chars_remaining by 2, not just 1
@@ -110,18 +110,18 @@ def shorten_summary(title, summary):
     # If I find any 2-weight characters in summary, deduct chars_remaining accordingly
     for s in summary:
         code_point = ord(s)
-        if not (0 <= code_point <= 4351 or \
-        8192 <= code_point <= 8205 or \
-        8208 <= code_point <= 8223 or \
-        8242 <= code_point <= 8247):
-            chars_remaining -= 1    # subtract 1 instead of 2 since len(summary) already covers regular chars. I just need to reduce chars_remaining for ever 2-weight char I have
+        if not (0 <= code_point <= 4351 or
+                8192 <= code_point <= 8205 or
+                8208 <= code_point <= 8223 or
+                8242 <= code_point <= 8247):
+            # subtract 1 instead of 2 since len(summary) already covers regular chars. I just need to reduce chars_remaining for ever 2-weight char I have
+            chars_remaining -= 1
 
     # If summary is too long to fit into 1 tweet, cut it off and add an ellipsis
     if len(summary) > chars_remaining:
-        summary = summary[:chars_remaining - 3] # -3 to make room for the ellipsis
+        # -3 to make room for the ellipsis
+        summary = summary[:chars_remaining - 3]
         summary += '...'
-
-        # Add an ellpisis at the end
 
     return summary
 
